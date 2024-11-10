@@ -1,7 +1,24 @@
-// FlamesContainer.jsx
-import { useState } from "react";
+import React, { useState, Dispatch, SetStateAction } from "react";
 
-const AskNames = ({
+// Define types for props
+interface AskNamesProps {
+  boyName: string;
+  setBoyName: Dispatch<SetStateAction<string>>;
+  girlName: string;
+  setGirlName: Dispatch<SetStateAction<string>>;
+  setScreen: Dispatch<SetStateAction<number>>;
+}
+
+const letterToRelationMap = {
+  f: "Friendship",
+  l: "Love",
+  a: "Affection",
+  m: "Marriage",
+  e: "Enemies",
+  s: "Siblings",
+};
+
+const AskNames: React.FC<AskNamesProps> = ({
   boyName,
   setBoyName,
   girlName,
@@ -9,28 +26,28 @@ const AskNames = ({
   setScreen,
 }) => {
   return (
-    <>
+    <div className="flex flex-col space-y-6">
       <input
         type="text"
         placeholder="Boy's Name"
-        className="p-2 border rounded w-64"
+        className="p-4 border-2 rounded-xl w-full bg-gray-800 text-gray-100 placeholder-gray-400 border-gray-600 focus:border-yellow-500 focus:ring-yellow-500 outline-none text-lg"
         value={boyName}
         onChange={(e) => setBoyName(e.target.value)}
       />
       <input
         type="text"
         placeholder="Girl's Name"
-        className="p-2 border rounded w-64"
+        className="p-4 border-2 rounded-xl w-full bg-gray-800 text-gray-100 placeholder-gray-400 border-gray-600 focus:border-yellow-500 focus:ring-yellow-500 outline-none text-lg"
         value={girlName}
         onChange={(e) => setGirlName(e.target.value)}
       />
       <button
-        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        className="px-6 py-3 bg-yellow-500 text-black rounded-lg hover:bg-yellow-600 transition-colors w-full text-lg"
         onClick={() => setScreen(1)}
       >
         Submit
       </button>
-    </>
+    </div>
   );
 };
 
@@ -57,7 +74,9 @@ const getUniqueLetters = (boyName: string, girlName: string): number => {
   return uniqueCount;
 };
 
-const getFinalAnswer = (uniqueLettersLength: number) => {
+const getFinalAnswer = (
+  uniqueLettersLength: number
+): keyof typeof letterToRelationMap => {
   const finalAnsArr = "flames".split("");
   let remainder = 0;
   for (let i = 0; i < 5; i++) {
@@ -68,46 +87,60 @@ const getFinalAnswer = (uniqueLettersLength: number) => {
     if (remainder >= finalAnsArr.length) remainder = 0;
     finalAnsArr.splice(moduloNum - 1, 1);
   }
-  return finalAnsArr;
+  return finalAnsArr[0] as keyof typeof letterToRelationMap; // cast to a key of letterToRelationMap
 };
 
-const FlamesContainer = () => {
-  const [screen, setScreen] = useState(0);
-  const [boyName, setBoyName] = useState("");
-  const [girlName, setGirlName] = useState("");
+const FlamesContainer: React.FC = () => {
+  const [screen, setScreen] = useState<number>(0);
+  const [boyName, setBoyName] = useState<string>("");
+  const [girlName, setGirlName] = useState<string>("");
+
   return (
-    <div className="flex flex-col items-center justify-center p-36 border border-black shadow-lg rounded-lg space-y-4">
-      <h3>FLAMES - Bringing back some millenial fun!</h3>
-      {screen === 0 && (
-        <AskNames
-          boyName={boyName}
-          girlName={girlName}
-          setBoyName={setBoyName}
-          setGirlName={setGirlName}
-          setScreen={setScreen}
-        />
-      )}
-      {screen === 1 && (
-        <div className="flex flex-wrap flex-col space-y-2">
-          <p>Boy's name is {boyName}</p>
-          <p>Girl's name is {girlName}</p>
-          {/* <p>
-            Unique letters are {getUniqueLetters(boyName, girlName).join(", ")}
-          </p> */}
-          <p>Number of unique letters: {getUniqueLetters(boyName, girlName)}</p>
-          <button
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-            onClick={() => setScreen(2)}
-          >
-            Get Result
-          </button>
-        </div>
-      )}
-      {screen == 2 && (
-        <div className="flex flex-wrap flex-col space-y-2">
-          {getFinalAnswer(getUniqueLetters(boyName, girlName))}
-        </div>
-      )}
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-gray-200 font-['VT323'] px-6 w-full">
+      <div className="p-8 border-2 border-gray-600 shadow-xl rounded-xl text-center bg-gray-800 space-y-8 w-full max-w-2xl">
+        <h3 className="text-5xl text-yellow-500">
+          FLAMES - Bringing Back Millennial Fun!
+        </h3>
+
+        {screen === 0 && (
+          <AskNames
+            boyName={boyName}
+            girlName={girlName}
+            setBoyName={setBoyName}
+            setGirlName={setGirlName}
+            setScreen={setScreen}
+          />
+        )}
+
+        {screen === 1 && (
+          <div className="space-y-6">
+            <p className="text-lg">Boy's name is {boyName}</p>
+            <p className="text-lg">Girl's name is {girlName}</p>
+            <p className="text-lg">
+              Number of unique letters: {getUniqueLetters(boyName, girlName)}
+            </p>
+            <button
+              className="px-6 py-3 bg-yellow-500 text-black rounded-lg hover:bg-yellow-600 transition-colors w-full text-lg"
+              onClick={() => setScreen(2)}
+            >
+              Get Result
+            </button>
+          </div>
+        )}
+
+        {screen === 2 && (
+          <div className="space-y-6">
+            <p className="text-3xl">
+              Result:{" "}
+              {
+                letterToRelationMap[
+                  getFinalAnswer(getUniqueLetters(boyName, girlName))
+                ]
+              }
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
